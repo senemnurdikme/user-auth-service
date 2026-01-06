@@ -1,0 +1,16 @@
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@mail.com",
+  "password": "123456"
+}
+
+###  Hatalı login (yanlış şifre)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@mail.com",
+  "password": "wrong"
+}
