@@ -14,3 +14,5 @@ Content-Type: application/json
   "email": "test@mail.com",
   "password": "wrong"
 }
+###
+GET http://localhost:8080/api/users/me
