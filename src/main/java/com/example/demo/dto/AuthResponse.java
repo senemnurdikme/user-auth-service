@@ -1,20 +1,14 @@
 package com.example.demo.dto;
 
 public class AuthResponse {
+    private String email;
+    private String status;
 
-    private String username;
-    private String password;
-
-    public AuthResponse(String username, String password) {
-        this.username = username;
-        this.password = password;
+    public AuthResponse(String email, String status) {
+        this.email = email;
+        this.status = status;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
+    public String getEmail() { return email; }
+    public String getStatus() { return status; }
 }

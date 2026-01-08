@@ -1,41 +1,433 @@
 <!doctype html>
-<html>
+<html lang="tr">
 <head>
-    <meta charset="utf-8">
-    <title>Login Test</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Auth Service | Toz Pembe Login Test</title>
+    <style>
+        :root {
+            /* Renk Paleti - Toz Pembe & Açık Tonlar */
+            --bg: #fdf2f8; /* Çok açık pembe arka plan */
+            --card-bg: #fff0f6; /* Daha açık pembe kart arka planı */
+            --accent: #ec4899; /* Canlı pembe vurgu */
+            --accent-hover: #db2777; /* Koyu pembe vurgu hover */
+            --success: #10b981; /* Yeşil başarı rengi */
+            --danger: #ef4444; /* Kırmızı hata rengi */
+            --text-main: #334155; /* Koyu gri ana metin */
+            --text-muted: #64748b; /* Orta gri hafif metin */
+            --border: rgba(0, 0, 0, 0.08); /* Açık renkli kenarlık */
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: var(--text-main);
+            background-color: var(--bg);
+            background-image:
+                    radial-gradient(at 0% 0%, rgba(236, 72, 153, 0.08) 0px, transparent 50%),
+                    radial-gradient(at 100% 100%, rgba(251, 113, 133, 0.05) 0px, transparent 50%);
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 32px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Sol Panel: Bilgi Alanı */
+        .info-section {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(236, 72, 153, 0.1);
+            border: 1px solid rgba(236, 72, 153, 0.2);
+            color: #ec4899;
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 500;
+            width: fit-content;
+            margin-bottom: 24px;
+        }
+
+        .badge .dot {
+            width:8px;
+            height:8px;
+            background:var(--accent);
+            border-radius:50%;
+        }
+
+        .info-section h1 {
+            font-size: 42px;
+            font-weight: 800;
+            margin: 0 0 16px 0;
+            letter-spacing: -0.025em;
+            color: var(--text-main);
+        }
+
+        .info-section p {
+            color: var(--text-muted);
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        .features {
+            display: grid;
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .feat-item {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+
+        .feat-item:hover { background: rgba(255, 255, 255, 0.7); }
+
+        .feat-item svg { color: var(--success); width: 20px; }
+        .feat-item svg.eye-icon { color: var(--accent); }
+
+        /* Sağ Panel: Form Alanı */
+        .login-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(8px);
+        }
+
+        .form-group { margin-bottom: 20px; }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+
+        .input-wrapper { position: relative; }
+
+        .input {
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            color: var(--text-main);
+            font-size: 15px;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.1);
+        }
+
+        .toggle-pass {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-submit:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .btn-submit:active { transform: translateY(0); }
+        .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        /* Sonuç Paneli */
+        .result-panel {
+            margin-top: 24px;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            display: none;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .result-panel.success { border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.08); }
+        .result-panel.error { border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.08); }
+
+        /* ✅ Mesaj rengi */
+        .result-panel.success #resultMessage { color: #059669; }
+        .result-panel.error #resultMessage { color: #dc2626; }
+
+        #resultMessage {
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+        }
+
+        .stats span b { color: var(--text-main); }
+
+        code {
+            display: block;
+            background: #f1f5f9;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            overflow-x: auto;
+            max-height: 200px;
+            color: #881337;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.5);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 860px) {
+            .container { grid-template-columns: 1fr; }
+            .info-section { padding: 20px; text-align: center; align-items: center; }
+            .info-section h1 { font-size: 32px; }
+        }
+    </style>
 </head>
 <body>
 
-<h2>Login Test Page</h2>
+<div class="container">
+    <section class="info-section">
+        <div class="badge">
+            <span class="dot"></span> v2.0 Stable Connection
+        </div>
+        <h1>Auth Gateway Test Terminal</h1>
+        <p>Backend servisleriniz için performans odaklı ve detaylı login test aracı.</p>
 
-<input id="email" placeholder="Email"><br><br>
-<input id="password" type="password" placeholder="Password"><br><br>
+        <div class="features">
+            <div class="feat-item">
+                <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                <div>
+                    <div style="font-weight:600">Düşük Gecikme Takibi</div>
+                    <div style="font-size:13px; color:var(--text-muted)">High-resolution timer ile request süresi.</div>
+                </div>
+            </div>
+            <div class="feat-item">
+                <svg class="eye-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path></svg>
+                <div>
+                    <div style="font-weight:600">Payload Analizi</div>
+                    <div style="font-size:13px; color:var(--text-muted)">Gelen JSON yanıtını anında formatlar.</div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<button onclick="login()">Login</button>
+    <main class="login-card">
+        <h2 style="margin-top:0">Sisteme Giriş Yap</h2>
+        <p style="color:var(--text-muted); font-size:14px; margin-bottom:24px">Lütfen API kimlik bilgilerinizi girin.</p>
 
-<p id="result"></p>
+        <div class="form-group">
+            <label for="email">E-POSTA ADRESİ</label>
+            <div class="input-wrapper">
+                <input type="email" id="email" class="input" placeholder="admin@company.com" value="user@example.com">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="password">ŞİFRE</label>
+            <div class="input-wrapper">
+                <input type="password" id="password" class="input" placeholder="••••••••">
+                <button type="button" id="togglePass" class="toggle-pass">GÖSTER</button>
+            </div>
+        </div>
+
+        <button id="loginBtn" class="btn-submit">
+            <span id="spinner" class="spinner"></span>
+            <span id="btnLabel">Oturum Aç</span>
+        </button>
+
+        <div id="resultPanel" class="result-panel">
+            <!-- ✅ yeni mesaj alanı -->
+            <div id="resultMessage"></div>
+
+            <div class="stats">
+                <span>HTTP: <b id="statusText">-</b></span>
+                <span>Süre: <b id="timeText">-</b></span>
+            </div>
+            <code id="responseBody">// Yanıt burada görünecek</code>
+        </div>
+
+        <p style="font-size:12px; color:var(--text-muted); margin-top:20px; text-align:center">
+            Endpoint: <code style="display:inline; padding:2px 6px">POST /auth/login</code>
+        </p>
+    </main>
+</div>
 
 <script>
-    async function login() {
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
+    const AuthTester = {
+        config: {
+            url: "/auth/login",
+            timeout: 10000
+        },
 
-        const start = performance.now();
+        UI: {
+            btn: document.getElementById('loginBtn'),
+            label: document.getElementById('btnLabel'),
+            spinner: document.getElementById('spinner'),
+            result: document.getElementById('resultPanel'),
+            status: document.getElementById('statusText'),
+            time: document.getElementById('timeText'),
+            body: document.getElementById('responseBody'),
+            msg: document.getElementById('resultMessage'),
+            passInput: document.getElementById('password'),
+            toggleBtn: document.getElementById('togglePass')
+        },
 
-        const response = await fetch("/auth/login", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ email, password })
-        });
+        init() {
+            this.UI.btn.addEventListener('click', () => this.handleLogin());
+            this.UI.toggleBtn.addEventListener('click', () => this.togglePassword());
 
-        const data = await response.json(); // OBJECT geliyor
-        const end = performance.now();
+            document.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.handleLogin();
+            });
+        },
 
-        document.getElementById("result").innerText =
-            "Result: SUCCESS | Time (ms): " + (end - start).toFixed(2);
-    }
+        togglePassword() {
+            const isPass = this.UI.passInput.type === 'password';
+            this.UI.passInput.type = isPass ? 'text' : 'password';
+            this.UI.toggleBtn.textContent = isPass ? 'GİZLE' : 'GÖSTER';
+        },
+
+        setLoading(state) {
+            this.UI.btn.disabled = state;
+            this.UI.spinner.style.display = state ? 'block' : 'none';
+            this.UI.label.textContent = state ? 'İşleniyor...' : 'Oturum Aç';
+        },
+
+        async handleLogin() {
+            const email = document.getElementById('email').value;
+            const password = this.UI.passInput.value;
+
+            if (!email || !password) {
+                this.updateUI(false, "HATA", 0, { error: "Alanlar boş bırakılamaz." });
+                return;
+            }
+
+            this.setLoading(true);
+            const startTime = performance.now();
+
+            try {
+                const response = await fetch(this.config.url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const endTime = performance.now();
+                const duration = (endTime - startTime).toFixed(2);
+
+                let data;
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    data = await response.json();
+                } else {
+                    data = await response.text();
+                }
+
+                this.updateUI(response.ok, response.status, duration, data);
+            } catch (error) {
+                const endTime = performance.now();
+                this.updateUI(false, "FAILED", (endTime - startTime).toFixed(2), {
+                    message: "Sunucuya erişilemedi veya CORS hatası.",
+                    detail: error.message
+                });
+            } finally {
+                this.setLoading(false);
+            }
+        },
+
+        updateUI(isSuccess, status, duration, data) {
+            this.UI.result.style.display = 'block';
+            this.UI.result.className = `result-panel ${isSuccess ? 'success' : 'error'}`;
+
+            this.UI.status.textContent = status;
+            this.UI.time.textContent = `${duration}ms`;
+
+            // ✅ Yeşil/Kırmızı mesaj
+            if (isSuccess) {
+                this.UI.msg.textContent = "✅ Giriş Başarılı";
+            } else {
+                this.UI.msg.textContent = "❌ E-posta veya şifre hatalı";
+            }
+
+            // JSON yine görünsün
+            this.UI.body.textContent =
+                typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+        }
+    };
+
+    AuthTester.init();
 </script>
-
-
 </body>
 </html>

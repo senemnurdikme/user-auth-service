@@ -11,34 +11,29 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    //  ADD THIS METHOD (fixes "cannot find symbol register(User)")
+
     public User register(User user) {
-        // Encode password before saving
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already exists");
+        }
+
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         return userRepository.save(user);
     }
 
-    public boolean login(String email, String password) {
 
-        long startTime = System.nanoTime();
+    public boolean login(String email, String rawPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        boolean authenticated = userRepository.findByEmail(email)
-                .map(u -> passwordEncoder.matches(password, u.getPassword()))
-                .orElse(false);
-
-        long endTime = System.nanoTime();
-        double elapsedMs = (endTime - startTime) / 1_000_000.0;
-
-        System.out.println(
-                "LOGIN execution time (ms): " + String.format("%.3f", elapsedMs)
-                        + " | email=" + email
-        );
-
-        return authenticated;
+        return passwordEncoder.matches(rawPassword, user.getPassword());
     }
 }

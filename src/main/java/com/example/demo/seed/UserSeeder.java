@@ -2,28 +2,34 @@ package com.example.demo.seed;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class UserSeeder implements CommandLineRunner {
 
     private final JdbcTemplate jdbcTemplate;
-
-
-    private final PasswordEncoder seedEncoder = new BCryptPasswordEncoder(4);
+    private final PasswordEncoder passwordEncoder;
 
     private static final SecureRandom RNG = new SecureRandom();
     private static final char[] CHARS =
             "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*_-+=".toCharArray();
 
-    public UserSeeder(JdbcTemplate jdbcTemplate) {
+    // 🔴 Plain password tutulacak kullanıcı indexleri
+    private static final Set<Integer> PLAIN_USERS = Set.of(
+            40_000,
+            50_000,
+            300_000,
+            500_000,
+            700_000
+    );
+
+    public UserSeeder(JdbcTemplate jdbcTemplate, PasswordEncoder passwordEncoder) {
         this.jdbcTemplate = jdbcTemplate;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -33,58 +39,66 @@ public class UserSeeder implements CommandLineRunner {
         final int totalUsers = 1_000_000;
         final int batchSize = 10_000;
 
-        Integer existingCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM users", Integer.class);
-        System.out.println("Existing users: " + existingCount);
+        Integer existing = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM users",
+                Integer.class
+        );
 
-        if (existingCount != null && existingCount >= totalUsers) {
+        System.out.println("Existing users: " + existing);
+
+        if (existing != null && existing >= totalUsers) {
             System.out.println("Users table already contains sufficient data. Seeding skipped.");
             return;
         }
 
-        long startTime = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         for (int i = 0; i < totalUsers; i += batchSize) {
             int from = i;
             int to = Math.min(i + batchSize, totalUsers);
 
-            System.out.println("Preparing batch: " + from + " -> " + (to - 1));
-
-            List<Object[]> batch = new ArrayList<>(to - from);
+            List<Object[]> batch = new ArrayList<>(batchSize);
 
             for (int j = from; j < to; j++) {
+
                 String rawPassword = generatePassword(14);
-                String hashedPassword = seedEncoder.encode(rawPassword);
+                String hashedPassword = passwordEncoder.encode(rawPassword);
+
+                String plainToStore = PLAIN_USERS.contains(j)
+                        ? rawPassword
+                        : null;
 
                 batch.add(new Object[]{
                         "user" + j + "@test.com",
                         "Name" + j,
                         "Surname" + j,
                         hashedPassword,
+                        plainToStore,
                         "U" + j
                 });
             }
 
-            System.out.println("Hashing done. Inserting batch...");
-            int[] res = jdbcTemplate.batchUpdate(
-                    "INSERT INTO users (email, first_name, last_name, password, user_no) VALUES (?, ?, ?, ?, ?)",
+            jdbcTemplate.batchUpdate(
+                    """
+                    INSERT INTO users
+                    (email, first_name, last_name, password, plain_password, user_no)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
                     batch
             );
-            System.out.println("Inserted rows in this batch: " + res.length);
 
             if (i % 100_000 == 0) {
-                Integer c = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM users", Integer.class);
-                System.out.println("CHECK COUNT after insert: " + c);
+                System.out.println("Inserted users: " + i);
             }
         }
 
-        long endTime = System.currentTimeMillis();
-        System.out.println("✔ " + totalUsers + " users inserted successfully.");
-        System.out.println("Total time (ms): " + (endTime - startTime));
+        System.out.println("✔ Seeding completed in " +
+                (System.currentTimeMillis() - start) + " ms");
     }
 
     private static String generatePassword(int length) {
         StringBuilder sb = new StringBuilder(length);
-        for (int k = 0; k < length; k++) {
+        for (int i = 0; i < length; i++) {
             sb.append(CHARS[RNG.nextInt(CHARS.length)]);
         }
         return sb.toString();

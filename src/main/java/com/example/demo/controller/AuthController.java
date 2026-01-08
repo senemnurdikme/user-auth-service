@@ -1,8 +1,11 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.AuthResponse;
+import com.example.demo.dto.LoginRequest;
 import com.example.demo.model.User;
 import com.example.demo.service.AuthService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,27 +19,21 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public AuthResponse register(@RequestBody User user) {
-        User savedUser = authService.register(user);
-
-        return new AuthResponse(
-                savedUser.getEmail(),
-                "***"
-        );
-
+    public ResponseEntity<AuthResponse> register(@RequestBody User user) {
+        User saved = authService.register(user);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new AuthResponse(saved.getEmail(), "CREATED"));
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody User user) {
-        boolean success = authService.login(user.getEmail(), user.getPassword());
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+        boolean success = authService.login(request.getEmail(), request.getPassword());
 
         if (!success) {
-            throw new RuntimeException("Invalid credentials");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new AuthResponse(request.getEmail(), "INVALID"));
         }
 
-        return new AuthResponse(
-                user.getEmail(),
-                user.getPassword()
-        );
+        return ResponseEntity.ok(new AuthResponse(request.getEmail(), "SUCCESS"));
     }
 }
