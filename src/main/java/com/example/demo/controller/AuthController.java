@@ -20,9 +20,10 @@ public class AuthController {
         User savedUser = authService.register(user);
 
         return new AuthResponse(
-                savedUser.getEmail(),  // username
-                user.getPassword()     // plain password (requested to be shown)
+                savedUser.getEmail(),
+                "***"
         );
+
     }
 
     @PostMapping("/login")
@@ -34,8 +35,8 @@ public class AuthController {
         }
 
         return new AuthResponse(
-                user.getEmail(),       // username
-                user.getPassword()      // plain password (requested to be shown)
+                user.getEmail(),
+                user.getPassword()
         );
     }
 }
