@@ -28,11 +28,18 @@
             place-items: center;
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             color: var(--text-main);
-            background-color: var(--bg);
-            background-image:
-                    radial-gradient(at 0% 0%, rgba(236, 72, 153, 0.08) 0px, transparent 50%),
-                    radial-gradient(at 100% 100%, rgba(251, 113, 133, 0.05) 0px, transparent 50%);
             padding: 20px;
+
+            background-image:
+                    radial-gradient(at 0% 0%, rgba(236, 72, 153, 0.10) 0px, transparent 50%),
+                    radial-gradient(at 100% 100%, rgba(251, 113, 133, 0.08) 0px, transparent 50%),
+                    linear-gradient(rgba(253, 242, 248, 0.82), rgba(253, 242, 248, 0.82)),
+                    url("/img/bg.png"); /* <- BURAYI kendi dosya adına göre değiştir */
+
+            background-size: auto, auto, auto, cover;
+            background-position: 0 0, 100% 100%, center, center;
+            background-repeat: no-repeat;
+            background-attachment: scroll, scroll, scroll, fixed;
         }
 
         .container {
@@ -96,24 +103,28 @@
             gap: 12px;
             align-items: center;
             padding: 16px;
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.55);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             transition: var(--transition);
             box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            backdrop-filter: blur(6px);
         }
-        .feat-item:hover { background: rgba(255, 255, 255, 0.7); }
+        .feat-item:hover { background: rgba(255, 255, 255, 0.70); }
         .feat-item svg { color: var(--success); width: 20px; }
         .feat-item svg.eye-icon { color: var(--accent); }
 
+        /* ✅ LOGIN CARD CAM EFEKTİ */
         .login-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
+            background: rgba(255, 240, 246, 0.75);
+            border: 1px solid rgba(0,0,0,0.08);
             border-radius: var(--radius-lg);
             padding: 32px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.14);
+            backdrop-filter: blur(12px);
+            width: 100%;
         }
+
         .form-group { margin-bottom: 20px; }
         label {
             display: block;
@@ -125,7 +136,7 @@
         .input-wrapper { position: relative; }
         .input {
             width: 100%;
-            background: #ffffff;
+            background: rgba(255,255,255,0.95);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             padding: 12px 16px;
@@ -136,7 +147,7 @@
         }
         .input:focus {
             border-color: var(--accent);
-            box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.1);
+            box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.12);
         }
         .toggle-pass {
             position: absolute;
@@ -169,16 +180,38 @@
         .btn-submit:active { transform: translateY(0); }
         .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
 
+        /* MODE TOGGLE */
+        .mode-toggle { display:flex; gap:10px; margin: 10px 0 18px; }
+        .mode-btn{
+            flex: 1;
+            background: rgba(255,255,255,0.75);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 10px 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-main);
+            backdrop-filter: blur(8px);
+        }
+        .mode-btn:hover{ transform: translateY(-1px); }
+        .mode-btn.active{
+            background: rgba(236,72,153,0.18);
+            border-color: rgba(236,72,153,0.35);
+            color: var(--accent);
+        }
+
         .result-panel {
             margin-top: 24px;
             padding: 16px;
             border-radius: var(--radius-md);
             display: none;
             border: 1px solid var(--border);
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.70);
+            backdrop-filter: blur(10px);
         }
-        .result-panel.success { border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.08); }
-        .result-panel.error { border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.08); }
+        .result-panel.success { border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.10); }
+        .result-panel.error { border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.10); }
         .result-panel.success #resultMessage { color: #059669; }
         .result-panel.error #resultMessage { color: #dc2626; }
 
@@ -195,6 +228,7 @@
             letter-spacing: 0.05em;
             margin-bottom: 12px;
             color: var(--text-muted);
+            flex-wrap: wrap;
         }
         .stats span b { color: var(--text-main); }
         code {
@@ -230,10 +264,10 @@
 <div class="container">
     <section class="info-section">
         <div class="badge">
-            <span class="dot"></span> v2.0 Stable Connection
+            <span class="dot"></span> v2.1 Login + Register
         </div>
         <h1>Auth Gateway Test Terminal</h1>
-        <p>Backend servisleriniz için performans odaklı ve detaylı login test aracı.</p>
+        <p>Backend servisleriniz için performans odaklı ve detaylı kimlik doğrulama test aracı.</p>
 
         <div class="features">
             <div class="feat-item">
@@ -260,13 +294,44 @@
     </section>
 
     <main class="login-card">
-        <h2 style="margin-top:0">Sisteme Giriş Yap</h2>
-        <p style="color:var(--text-muted); font-size:14px; margin-bottom:24px">Lütfen API kimlik bilgilerinizi girin.</p>
+        <!-- Buradan sonrası sende aynen kalsın -->
+        <h2 id="formTitle" style="margin-top:0">Sisteme Giriş Yap</h2>
+        <p id="formDesc" style="color:var(--text-muted); font-size:14px; margin-bottom:12px">
+            Lütfen API kimlik bilgilerinizi girin.
+        </p>
+
+        <div class="mode-toggle">
+            <button type="button" id="modeLogin" class="mode-btn active">Giriş</button>
+            <button type="button" id="modeRegister" class="mode-btn">Kayıt Ol</button>
+        </div>
+
+        <div id="registerFields" style="display:none;">
+            <div class="form-group">
+                <label for="firstName">AD</label>
+                <div class="input-wrapper">
+                    <input type="text" id="firstName" class="input" placeholder="Ad">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="lastName">SOYAD</label>
+                <div class="input-wrapper">
+                    <input type="text" id="lastName" class="input" placeholder="Soyad">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="userNo">KULLANICI NO</label>
+                <div class="input-wrapper">
+                    <input type="text" id="userNo" class="input" placeholder="Örn: 1001">
+                </div>
+            </div>
+        </div>
 
         <div class="form-group">
             <label for="email">E-POSTA ADRESİ</label>
             <div class="input-wrapper">
-                <input type="email" id="email" class="input" placeholder="admin@company.com" value="user300000@test.com">
+                <input type="email" id="email" class="input" placeholder="admin@company.com" value="">
             </div>
         </div>
 
@@ -278,7 +343,7 @@
             </div>
         </div>
 
-        <button id="loginBtn" class="btn-submit" type="button">
+        <button id="submitBtn" class="btn-submit" type="button">
             <span id="spinner" class="spinner"></span>
             <span id="btnLabel">Oturum Aç</span>
         </button>
@@ -294,7 +359,7 @@
         </div>
 
         <p style="font-size:12px; color:var(--text-muted); margin-top:20px; text-align:center">
-            Endpoint: <code style="display:inline; padding:2px 6px">POST /auth/login</code>
+            Endpoint: <code id="endpointText" style="display:inline; padding:2px 6px">POST /auth/login</code>
         </p>
     </main>
 </div>
@@ -303,10 +368,22 @@
     const $ = (s) => document.querySelector(s);
 
     const ui = {
+        modeLogin: $("#modeLogin"),
+        modeRegister: $("#modeRegister"),
+        registerFields: $("#registerFields"),
+        formTitle: $("#formTitle"),
+        formDesc: $("#formDesc"),
+        endpointText: $("#endpointText"),
+
+        firstName: $("#firstName"),
+        lastName: $("#lastName"),
+        userNo: $("#userNo"),
+
         email: $("#email"),
         password: $("#password"),
         togglePass: $("#togglePass"),
-        btn: $("#loginBtn"),
+
+        btn: $("#submitBtn"),
         spinner: $("#spinner"),
         btnLabel: $("#btnLabel"),
 
@@ -317,24 +394,48 @@
         body: $("#responseBody"),
     };
 
+    let mode = "login";
+
+    function setMode(next) {
+        mode = next;
+        const isRegister = mode === "register";
+
+        ui.registerFields.style.display = isRegister ? "block" : "none";
+        ui.modeLogin.classList.toggle("active", !isRegister);
+        ui.modeRegister.classList.toggle("active", isRegister);
+
+        ui.btnLabel.textContent = isRegister ? "Kayıt Ol" : "Oturum Aç";
+        ui.formTitle.textContent = isRegister ? "Hesap Oluştur" : "Sisteme Giriş Yap";
+        ui.formDesc.textContent = isRegister
+            ? "Yeni kullanıcı kaydı oluşturun."
+            : "Lütfen API kimlik bilgilerinizi girin.";
+        ui.endpointText.textContent = isRegister ? "POST /auth/register" : "POST /auth/login";
+
+        ui.panel.style.display = "none";
+    }
+
     function setLoading(on) {
         ui.btn.disabled = on;
         ui.spinner.style.display = on ? "inline-block" : "none";
-        ui.btnLabel.textContent = on ? "İşleniyor..." : "Oturum Aç";
+        ui.btnLabel.textContent = on ? "İşleniyor..." : (mode === "register" ? "Kayıt Ol" : "Oturum Aç");
     }
 
-    function showResult(ok, status, durationMs, data) {
+    function showResult(ok, status, durationMs, data, customMessage) {
         ui.panel.style.display = "block";
         ui.panel.classList.toggle("success", ok);
         ui.panel.classList.toggle("error", !ok);
 
-        ui.message.textContent = ok ? "✅ Giriş başarılı" : "❌ E-posta veya şifre hatalı";
+        ui.message.textContent = customMessage || (ok ? "✅ Başarılı" : "❌ İşlem başarısız");
         ui.statusText.textContent = status;
         ui.timeText.textContent = `${durationMs.toFixed(2)}ms`;
 
-        ui.body.textContent =
-            typeof data === "object" ? JSON.stringify(data, null, 2) : String(data);
+        ui.body.textContent = typeof data === "object"
+            ? JSON.stringify(data, null, 2)
+            : String(data);
     }
+
+    ui.modeLogin?.addEventListener("click", () => setMode("login"));
+    ui.modeRegister?.addEventListener("click", () => setMode("register"));
 
     ui.togglePass?.addEventListener("click", () => {
         const isPass = ui.password.type === "password";
@@ -343,40 +444,81 @@
     });
 
     ui.btn?.addEventListener("click", async () => {
+        const isRegister = mode === "register";
         const email = ui.email.value.trim();
         const password = ui.password.value;
 
         if (!email || !password) {
-            showResult(false, 400, 0, { error: "E-posta ve şifre boş olamaz." });
+            showResult(false, 400, 0, { error: "E-posta ve şifre boş olamaz." }, "❌ E-posta ve şifre boş olamaz");
             return;
+        }
+
+        if (isRegister) {
+            const firstName = ui.firstName.value.trim();
+            const lastName = ui.lastName.value.trim();
+            const userNo = ui.userNo.value.trim();
+
+            if (!firstName || !lastName || !userNo) {
+                showResult(false, 400, 0, { error: "Ad, Soyad ve Kullanıcı No zorunlu." }, "❌ Kayıt için tüm alanları doldur");
+                return;
+            }
         }
 
         setLoading(true);
         const t0 = performance.now();
 
         try {
-            const res = await fetch("/auth/login", {
+            const url = isRegister ? "/auth/register" : "/auth/login";
+
+            const payload = isRegister ? {
+                email,
+                password,
+                firstName: ui.firstName.value.trim(),
+                lastName: ui.lastName.value.trim(),
+                userNo: ui.userNo.value.trim(),
+            } : { email, password };
+
+            const res = await fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify(payload),
             });
 
             const t1 = performance.now();
+
             let data;
             const ct = res.headers.get("content-type") || "";
             if (ct.includes("application/json")) data = await res.json();
             else data = await res.text();
-            const success = res.ok && data && typeof data === "object" && data.status === "SUCCESS";
 
-            showResult(success, res.status, t1 - t0, data);
+            const ok = res.ok && typeof data === "object" && (
+                (isRegister && data.status === "CREATED") ||
+                (!isRegister && data.status === "SUCCESS")
+            );
 
-            if (success) {
+            let msg;
+            if (ok) msg = isRegister ? "✅ Kayıt başarılı" : "✅ Giriş başarılı";
+            else {
+                if (res.status === 409) msg = "❌ Bu e-posta zaten kayıtlı";
+                else if (res.status === 401) msg = "❌ E-posta veya şifre hatalı";
+                else msg = isRegister ? "❌ Kayıt başarısız" : "❌ Giriş başarısız";
+            }
+
+            showResult(ok, res.status, (t1 - t0), data, msg);
+
+            if (ok) {
                 localStorage.setItem("userEmail", data.email || email);
-                localStorage.setItem("loginStatus", "SUCCESS");
-                window.location.href = "/profile.html";
+
+                if (!isRegister) {
+                    localStorage.setItem("loginStatus", "SUCCESS");
+                    window.location.href = "/profile.html";
+                } else {
+                    setMode("login");
+                    ui.password.value = "";
+                }
             }
         } catch (e) {
-            showResult(false, 0, 0, { error: "Sunucuya bağlanılamadı", details: e.message });
+            showResult(false, 0, 0, { error: "Sunucuya bağlanılamadı", details: e.message }, "❌ Sunucuya bağlanılamadı");
         } finally {
             setLoading(false);
         }
@@ -385,6 +527,8 @@
     document.addEventListener("keydown", (e) => {
         if (e.key === "Enter") ui.btn.click();
     });
+
+    setMode("login");
 </script>
 </body>
 </html>
