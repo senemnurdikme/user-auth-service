@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Profil</title>
+
+    <style>
+        :root{
+            --bg:#fdf2f8;
+            --card:#fff0f6;
+            --accent:#ec4899;
+            --accent-hover:#db2777;
+            --text:#0f172a;
+            --muted:#64748b;
+            --border: rgba(0,0,0,.10);
+            --radius: 16px;
+        }
+        *{ box-sizing:border-box; }
+        body{
+            margin:0;
+            min-height:100vh;
+            display:grid;
+            place-items:center;
+            padding:24px;
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color:var(--text);
+            background: var(--bg);
+            background-image:
+                    radial-gradient(at 0% 0%, rgba(236,72,153,.10) 0px, transparent 50%),
+                    radial-gradient(at 100% 100%, rgba(251,113,133,.08) 0px, transparent 50%);
+        }
+        .card{
+            width:min(720px, 100%);
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius: var(--radius);
+            padding:24px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,.12);
+        }
+        h1{ margin:0 0 6px 0; letter-spacing:-.02em; }
+        p.sub{ margin:0 0 18px 0; color:var(--muted); font-size:14px; }
+
+        .grid{
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap:14px;
+        }
+        @media (max-width:720px){ .grid{ grid-template-columns:1fr; } }
+
+        .row{
+            display:flex;
+            gap:10px;
+            margin-bottom:14px;
+            color:var(--muted);
+            font-size:13px;
+        }
+        .pill{
+            background: rgba(255,255,255,.6);
+            border: 1px solid var(--border);
+            padding: 6px 10px;
+            border-radius: 999px;
+        }
+
+        label{
+            display:block;
+            font-size:12px;
+            color:var(--muted);
+            margin: 6px 0 6px;
+            font-weight:600;
+        }
+        input{
+            width:100%;
+            padding:12px 14px;
+            border:1px solid var(--border);
+            border-radius: 14px;
+            outline:none;
+            background:#fff;
+            font-size:14px;
+        }
+        input:focus{
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(236,72,153,.12);
+        }
+
+        .actions{
+            display:flex;
+            gap:12px;
+            margin-top:16px;
+        }
+        button{
+            flex:1;
+            border:none;
+            border-radius: 14px;
+            padding:12px 14px;
+            cursor:pointer;
+            font-weight:700;
+            font-size:14px;
+        }
+        #saveBtn{ background: var(--accent); color:#fff; }
+        #saveBtn:hover{ background: var(--accent-hover); }
+        #logoutBtn{ background: rgba(255,255,255,.75); }
+        #logoutBtn:hover{ background: rgba(255,255,255,.95); }
+
+        #msg{
+            margin-top:12px;
+            font-weight:700;
+            font-size:13px;
+        }
+    </style>
+</head>
+
+<body>
+<main class="card">
+    <h1>Profil</h1>
+    <p class="sub">kullanıcı bilgileri</p>
+
+    <div class="row">
+        <div class="pill">ID: <b id="uid">-</b></div>
+        <div class="pill">userNo: <b id="uno">-</b></div>
+    </div>
+
+    <div class="grid">
+        <div>
+            <label for="email">Email</label>
+            <input id="email" type="email" placeholder="email" />
+        </div>
+
+
+        <div>
+            <label for="password">Password</label>
+            <input id="password" type="password" placeholder="••••••••" disabled />
+        </div>
+
+
+        <div>
+            <label for="firstName">First Name</label>
+            <input id="firstName" type="text" placeholder="first name" />
+        </div>
+
+        <div>
+            <label for="lastName">Last Name</label>
+            <input id="lastName" type="text" placeholder="last name" />
+        </div>
+    </div>
+
+    <div class="actions">
+        <button id="saveBtn" type="button">Kaydet</button>
+        <button id="logoutBtn" type="button">Çıkış Yap</button>
+    </div>
+
+    <div id="msg"></div>
+</main>
+
+<script>
+    const ui = {
+        uid: document.getElementById("uid"),
+        uno: document.getElementById("uno"),
+        email: document.getElementById("email"),
+        firstName: document.getElementById("firstName"),
+        lastName: document.getElementById("lastName"),
+        msg: document.getElementById("msg"),
+        saveBtn: document.getElementById("saveBtn"),
+        logoutBtn: document.getElementById("logoutBtn"),
+    };
+
+    function setMsg(text, ok=true){
+        ui.msg.textContent = text;
+        ui.msg.style.color = ok ? "green" : "crimson";
+    }
+
+    const currentEmail = localStorage.getItem("userEmail");
+    if (!currentEmail) {
+        alert("Oturum yok. Login sayfasına yönlendiriliyor.");
+        window.location.href = "login.html";
+    }
+
+    async function loadProfile(){
+        const res = await fetch(`/api/users/by-email?email=${encodeURIComponent(currentEmail)}`);
+        if (!res.ok) throw new Error("Kullanıcı bilgisi çekilemedi");
+
+        const user = await res.json();
+
+        ui.uid.textContent = user.id ?? "-";
+        ui.uno.textContent = user.userNo ?? "-";
+        ui.email.value = user.email ?? "";
+        ui.firstName.value = user.firstName ?? "";
+        ui.lastName.value = user.lastName ?? "";
+
+
+        localStorage.setItem("userId", String(user.id ?? ""));
+    }
+
+    ui.logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("userEmail");
+        localStorage.removeItem("userId");
+        window.location.href = "login.html";
+    });
+
+    ui.saveBtn.addEventListener("click", () => {
+        setMsg("Kaydetme (PUT) adımına geçebiliriz ✅");
+    });
+
+    loadProfile()
+        .then(() => setMsg("Profil yüklendi ✅"))
+        .catch(err => {
+            console.error(err);
+            setMsg(err.message, false);
+        });
+</script>
+</body>
+</html>
