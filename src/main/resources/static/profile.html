@@ -54,6 +54,7 @@
             margin-bottom:14px;
             color:var(--muted);
             font-size:13px;
+            flex-wrap: wrap;
         }
         .pill{
             background: rgba(255,255,255,.6);
@@ -113,26 +114,15 @@
 <body>
 <main class="card">
     <h1>Profil</h1>
-    <p class="sub">kullanıcı bilgileri</p>
+    <p class="sub">Kullanıcı bilgileri</p>
 
     <div class="row">
         <div class="pill">ID: <b id="uid">-</b></div>
         <div class="pill">userNo: <b id="uno">-</b></div>
     </div>
 
+    <!-- İstediğin sıra: isim, soyisim, email, password -->
     <div class="grid">
-        <div>
-            <label for="email">Email</label>
-            <input id="email" type="email" placeholder="email" />
-        </div>
-
-
-        <div>
-            <label for="password">Password</label>
-            <input id="password" type="password" placeholder="••••••••" disabled />
-        </div>
-
-
         <div>
             <label for="firstName">First Name</label>
             <input id="firstName" type="text" placeholder="first name" />
@@ -141,6 +131,16 @@
         <div>
             <label for="lastName">Last Name</label>
             <input id="lastName" type="text" placeholder="last name" />
+        </div>
+
+        <div>
+            <label for="email">Email</label>
+            <input id="email" type="email" placeholder="email" />
+        </div>
+
+        <div>
+            <label for="password">Password</label>
+            <input id="password" type="password" placeholder="••••••••" />
         </div>
     </div>
 
@@ -153,60 +153,136 @@
 </main>
 
 <script>
-    const ui = {
-        uid: document.getElementById("uid"),
-        uno: document.getElementById("uno"),
-        email: document.getElementById("email"),
-        firstName: document.getElementById("firstName"),
-        lastName: document.getElementById("lastName"),
-        msg: document.getElementById("msg"),
-        saveBtn: document.getElementById("saveBtn"),
-        logoutBtn: document.getElementById("logoutBtn"),
+    const API_BASE = ""; // aynı origin
+
+    const $ = (s) => document.querySelector(s);
+
+    const UI = {
+        uid: $("#uid"),
+        uno: $("#uno"),
+        firstName: $("#firstName"),
+        lastName: $("#lastName"),
+        email: $("#email"),
+        password: $("#password"),
+        saveBtn: $("#saveBtn"),
+        logoutBtn: $("#logoutBtn"),
+        msg: $("#msg"),
     };
 
     function setMsg(text, ok=true){
-        ui.msg.textContent = text;
-        ui.msg.style.color = ok ? "green" : "crimson";
+        UI.msg.textContent = text;
+        UI.msg.style.color = ok ? "#16a34a" : "#dc2626";
     }
 
-    const currentEmail = localStorage.getItem("userEmail");
-    if (!currentEmail) {
-        alert("Oturum yok. Login sayfasına yönlendiriliyor.");
-        window.location.href = "login.html";
+    async function getUserByEmail(email) {
+        const res = await fetch(`${API_BASE}/api/users/by-email?email=${encodeURIComponent(email)}`);
+        if (!res.ok) throw new Error("Kullanıcı bulunamadı (by-email)");
+        return await res.json();
     }
 
-    async function loadProfile(){
-        const res = await fetch(`/api/users/by-email?email=${encodeURIComponent(currentEmail)}`);
-        if (!res.ok) throw new Error("Kullanıcı bilgisi çekilemedi");
+    async function updateUser(id, payload) {
+        const res = await fetch(`${API_BASE}/api/users/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
 
-        const user = await res.json();
-
-        ui.uid.textContent = user.id ?? "-";
-        ui.uno.textContent = user.userNo ?? "-";
-        ui.email.value = user.email ?? "";
-        ui.firstName.value = user.firstName ?? "";
-        ui.lastName.value = user.lastName ?? "";
-
-
-        localStorage.setItem("userId", String(user.id ?? ""));
+        if (!res.ok) {
+            const txt = await res.text().catch(()=> "");
+            throw new Error(`PUT başarısız: ${res.status} ${txt}`);
+        }
+        return await res.json();
     }
 
-    ui.logoutBtn.addEventListener("click", () => {
+    function fillForm(user){
+        UI.uid.textContent = user.id ?? "-";
+        UI.uno.textContent = user.userNo ?? "-";
+        UI.firstName.value = user.firstName ?? "";
+        UI.lastName.value = user.lastName ?? "";
+        UI.email.value = user.email ?? "";
+        // Güvenlik için password’u backend’den doldurmuyoruz.
+        // UI.password.value = "";  // boş kalsın
+    }
+
+    async function bootstrap(){
+        try{
+            const storedEmail = localStorage.getItem("userEmail");
+            const storedStatus = localStorage.getItem("loginStatus");
+
+            if (!storedEmail || storedStatus !== "SUCCESS") {
+                // oturum yoksa login'e
+                window.location.href = "/login.html";
+                return;
+            }
+
+            setMsg("Yükleniyor...", true);
+            const user = await getUserByEmail(storedEmail);
+            localStorage.setItem("userId", String(user.id));
+            fillForm(user);
+            setMsg("✅ Profil yüklendi", true);
+
+        } catch(e){
+            setMsg("❌ " + e.message, false);
+        }
+    }
+
+    UI.saveBtn.addEventListener("click", async () => {
+        try {
+            UI.saveBtn.disabled = true;
+            setMsg("Kaydediliyor...", true);
+
+            const storedId = localStorage.getItem("userId");
+            const storedEmail = localStorage.getItem("userEmail");
+
+            let userId = storedId ? Number(storedId) : null;
+            let userEmail = UI.email.value.trim() || storedEmail;
+
+            if (!userId) {
+                if (!userEmail) throw new Error("Oturum email bulunamadı.");
+                const user = await getUserByEmail(userEmail);
+                userId = user.id;
+                localStorage.setItem("userId", String(userId));
+            }
+
+            const payload = {
+                firstName: UI.firstName.value.trim(),
+                lastName: UI.lastName.value.trim(),
+                email: UI.email.value.trim(),
+                password: UI.password.value
+            };
+
+            if (!payload.firstName || !payload.lastName || !payload.email) {
+                throw new Error("İsim / Soyisim / Email boş olamaz.");
+            }
+
+            const updated = await updateUser(userId, payload);
+
+            // localStorage güncelle
+            localStorage.setItem("userEmail", updated.email || payload.email);
+
+            // formu güncelle
+            fillForm(updated);
+
+            // password alanını temizlemek iyi olur
+            UI.password.value = "";
+
+            setMsg("✅ Kaydedildi", true);
+        } catch (e) {
+            setMsg("❌ " + e.message, false);
+        } finally {
+            UI.saveBtn.disabled = false;
+        }
+    });
+
+    UI.logoutBtn.addEventListener("click", () => {
         localStorage.removeItem("userEmail");
         localStorage.removeItem("userId");
-        window.location.href = "login.html";
+        localStorage.removeItem("loginStatus");
+        window.location.href = "/login.html";
     });
 
-    ui.saveBtn.addEventListener("click", () => {
-        setMsg("Kaydetme (PUT) adımına geçebiliriz ✅");
-    });
-
-    loadProfile()
-        .then(() => setMsg("Profil yüklendi ✅"))
-        .catch(err => {
-            console.error(err);
-            setMsg(err.message, false);
-        });
+    bootstrap();
 </script>
+
 </body>
 </html>
